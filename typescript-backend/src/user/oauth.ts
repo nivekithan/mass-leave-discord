@@ -9,7 +9,7 @@ export function generateDiscordOAuthUrl(state: string) {
   discordAPIUrl.searchParams.set("client_id", DISCORD_CLIENT_ID);
   discordAPIUrl.searchParams.set("redirect_uri", REDIRECT_URI);
   discordAPIUrl.searchParams.set("response_type", "code");
-  discordAPIUrl.searchParams.set("scopes", SCOPES.join(" "));
+  discordAPIUrl.searchParams.set("scope", SCOPES.join(" "));
   discordAPIUrl.searchParams.set("state", state);
 
   return discordAPIUrl.toString();

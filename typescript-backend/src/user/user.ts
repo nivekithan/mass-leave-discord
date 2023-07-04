@@ -22,5 +22,5 @@ userRouter.get("/discord/oauth_url", async (c) => {
 
   const state = stateQuery.data;
 
-  return c.json({ oauth_url: generateDiscordOAuthUrl(state) });
+  return c.json({ ok: true, oauth_url: generateDiscordOAuthUrl(state) });
 });
