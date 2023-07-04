@@ -1,41 +1,28 @@
-import type { V2_MetaFunction } from "@remix-run/node";
+import type { LoaderArgs, V2_MetaFunction } from "@remix-run/node";
 
 export const meta: V2_MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Mass Leave Discord Severs" },
+    { name: "description", content: "Easily leave multiple discord servers" },
   ];
 };
 
+export async function loader({ request }: LoaderArgs) {
+  return null;
+}
+
 export default function Index() {
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
-    </div>
+    <main className="container py-32 flex justify-center">
+      <div className="">
+        <h1 className="text-4xl font-semibold leading-none tracking-tight text-center">
+          Mass leave Discord Servers
+        </h1>
+        <p className="mt-8 max-w-xl text-center text-lg">
+          Is your discord dashboard full of servers you don't care ? Use this
+          tool to easily leave from them immediately
+        </p>
+      </div>
+    </main>
   );
 }

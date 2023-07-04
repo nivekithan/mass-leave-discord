@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "target": "ES2019",
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./app/*"]
+    },
+    "esModuleInterop": true
+  },
+  "include": ["./src/**/*"]
+}
