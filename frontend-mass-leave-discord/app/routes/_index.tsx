@@ -46,8 +46,6 @@ export async function loader({ request }: LoaderArgs) {
 export default function Index() {
   const { discordOAuthUrl } = useLoaderData<typeof loader>();
 
-  console.log(decodeURIComponent(discordOAuthUrl));
-
   return (
     <main className="container py-32 flex justify-center">
       <div className="flex flex-col items-center">

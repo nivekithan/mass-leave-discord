@@ -2,7 +2,7 @@ import { getEnvVar } from "src/utils/env";
 
 const DISCORD_CLIENT_ID = getEnvVar("DISCORD_CLIENT_ID");
 const REDIRECT_URI = getEnvVar("DISCORD_REDIRECT_LINK");
-const SCOPES = ["guilds"];
+const SCOPES = ["guilds", "identify"];
 
 export function generateDiscordOAuthUrl(state: string) {
   const discordAPIUrl = new URL("https://discord.com/api/oauth2/authorize");

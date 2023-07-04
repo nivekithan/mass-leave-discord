@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
+import { DISCORD_TOKEN_URL } from "./constant";
 
 export async function exchangeOAuthCode({
   clientId,
