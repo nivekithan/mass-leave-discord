@@ -21,3 +21,24 @@ export async function getDiscordOauthUrl(csrfToken: string) {
 
   return body;
 }
+
+export async function authorizeUserWithDiscordCode(code: string) {
+  const url = new URL(
+    "/api/v1/user/discord/authorize",
+    getEnvVar("BACKEND_URL")
+  );
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+
+  const body = z
+    .union([
+      APIErrorSchema,
+      z.object({ ok: z.literal(true), userId: z.string() }),
+    ])
+    .parse(await res.json());
+
+  return body;
+}

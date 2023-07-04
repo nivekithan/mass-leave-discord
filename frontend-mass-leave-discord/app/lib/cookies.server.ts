@@ -39,3 +39,7 @@ export async function getCSRFTokenSession(
   csrfSession.set("csrf_token", randomUUID());
   return csrfSession;
 }
+
+export function randomCSRFToken() {
+  return randomUUID();
+}
