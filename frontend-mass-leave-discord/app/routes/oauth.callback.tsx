@@ -1,11 +1,12 @@
-import { redirect, type LoaderArgs, json } from "@remix-run/node";
+import { redirect, type LoaderArgs } from "@remix-run/node";
 import { z } from "zod";
 import { authorizeUserWithDiscordCode } from "~/lib/api/user.server";
 import {
   commitCSRFTokenSession,
   getCSRFTokenSession,
   randomCSRFToken,
-} from "~/lib/cookies.server";
+} from "~/lib/cookies/csrfTokenCookie.server";
+import { loginInUser } from "~/lib/cookies/userIdCookie.server";
 
 export async function loader({ request }: LoaderArgs) {
   const csrfSession = await getCSRFTokenSession(request.headers.get("Cookie"));
@@ -61,16 +62,20 @@ export async function loader({ request }: LoaderArgs) {
 
   const userId = authInfo.userId;
 
+  const [userIdSetCookieValue, csrfTokenSetCookieValue] = await Promise.all([
+    loginInUser(request, userId),
+    commitCSRFTokenSession(csrfSession),
+  ]);
+
+  const responseHeaders = new Headers();
+  responseHeaders.append("Set-Cookie", csrfTokenSetCookieValue);
+  responseHeaders.append("Set-Cookie", userIdSetCookieValue);
+
   /**
    * TODO:
    * Set userId in session storage and pass it in cookie
    */
-  return json(
-    { userId },
-    {
-      headers: {
-        "Set-Cookie": await commitCSRFTokenSession(csrfSession),
-      },
-    }
-  );
+  return redirect("/", {
+    headers: responseHeaders,
+  });
 }

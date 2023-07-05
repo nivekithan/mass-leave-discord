@@ -10,7 +10,8 @@ import { getDiscordOauthUrl } from "~/lib/api/user.server";
 import {
   commitCSRFTokenSession,
   getCSRFTokenSession,
-} from "~/lib/cookies.server";
+} from "~/lib/cookies/csrfTokenCookie.server";
+import { getCurrentUser } from "~/lib/cookies/userIdCookie.server";
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -20,31 +21,45 @@ export const meta: V2_MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderArgs) {
-  const csrfSession = await getCSRFTokenSession(request.headers.get("Cookie"));
+  const [csrfSession, currentUser] = await Promise.all([
+    getCSRFTokenSession(request.headers.get("Cookie")),
+    getCurrentUser(request),
+  ]);
 
   const csrfToken = csrfSession.get("csrf_token")!;
 
-  const discordOAuthUrl = await getDiscordOauthUrl(csrfToken);
+  if (!currentUser.present) {
+    const discordOAuthUrl = await getDiscordOauthUrl(csrfToken);
 
-  if (!discordOAuthUrl.ok) {
-    throw new Response(null, {
-      status: 500,
-      statusText: "Internal Server Error",
-    });
+    if (!discordOAuthUrl.ok) {
+      throw new Response(null, {
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+    }
+
+    return json(
+      {
+        discordOAuthUrl: discordOAuthUrl.oauth_url,
+        userLoggedIn: false,
+      } as const,
+      {
+        headers: {
+          "Set-Cookie": await commitCSRFTokenSession(csrfSession),
+        },
+      }
+    );
   }
 
-  return json(
-    { discordOAuthUrl: discordOAuthUrl.oauth_url },
-    {
-      headers: {
-        "Set-Cookie": await commitCSRFTokenSession(csrfSession),
-      },
-    }
-  );
+  const userId = currentUser.userId;
+
+  return json({ userId, userLoggedIn: true } as const, {
+    headers: { "Set-Cookie": await commitCSRFTokenSession(csrfSession) },
+  });
 }
 
 export default function Index() {
-  const { discordOAuthUrl } = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
 
   return (
     <main className="container py-32 flex justify-center">
@@ -56,9 +71,15 @@ export default function Index() {
           Is your discord dashboard full of servers you don't care ? Use this
           tool to easily leave from them immediately
         </p>
-        <Button variant="default" asChild className="mt-8">
-          <Link to={discordOAuthUrl}>Connect Discord</Link>
-        </Button>
+        {loaderData.userLoggedIn ? (
+          <Button variant="default" className="mt-8">
+            Hey you are logged In. So logout
+          </Button>
+        ) : (
+          <Button variant="default" asChild className="mt-8">
+            <Link to={loaderData.discordOAuthUrl}>Connect Discord</Link>
+          </Button>
+        )}
       </div>
     </main>
   );

@@ -10,6 +10,13 @@ const EnvVarSchema = z.object({
   BACKEND_URL: z
     .string()
     .url(`Set valid url for environment variable BACKEND_URL`),
+  COOKIE_SIGNING_SECRET: z
+    .string({
+      required_error: `Required environment variable COOKIE_SIGNING_SECRET is not set`,
+    })
+    .uuid({
+      message: `Environment variable COOKIE_SIGNING_SECRET should be uuid`,
+    }),
 });
 
 let envVar: null | z.infer<typeof EnvVarSchema> = null;
