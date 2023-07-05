@@ -3,10 +3,11 @@ import { generateDiscordOAuthUrl } from "./oauth";
 import { BAD_REQUEST } from "src/utils/statusCode";
 import { z } from "zod";
 import { getEnvVar } from "src/utils/env";
-import { getDiscordUser } from "src/discord/user";
-import { upsertUserToDb } from "src/modals/user";
+import { getCurrentUserGuilds, getDiscordUser } from "src/discord/user";
+import { getUserFromDb, upsertUserToDb } from "src/modals/user";
 import { fromZodError } from "zod-validation-error";
 import { exchangeOAuthCode } from "src/discord/oauth2";
+import { getDiscordLink } from "src/discord/imageLink";
 
 export const userRouter = new Hono();
 
@@ -70,4 +71,44 @@ userRouter.post("/discord/authorize", async (c) => {
   });
 
   return c.json({ ok: true, userId: userId.id });
+});
+
+userRouter.get("/:userId/active_guilds", async (c) => {
+  const userId = c.req.param("userId");
+
+  const userInDb = getUserFromDb(userId);
+
+  if (!userInDb) {
+    return c.json(
+      {
+        ok: false,
+        error: "bad_request",
+        message: `There is no user with id ${userId}`,
+      },
+      BAD_REQUEST
+    );
+  }
+
+  const memberGuilds = await getCurrentUserGuilds({
+    token: userInDb.access_key,
+  });
+
+  return c.json({
+    ok: true,
+    guilds: memberGuilds.map((v) => {
+      return {
+        id: v.id,
+        name: v.name,
+        icon_url: v.icon
+          ? getDiscordLink({
+              type: "icon",
+              hash: v.icon,
+              guildId: v.id,
+              size: 64,
+            })
+          : undefined,
+        owner: v.owner ? true : false,
+      };
+    }),
+  });
 });

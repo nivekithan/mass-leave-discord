@@ -6,7 +6,7 @@ import {
 } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
-import { getDiscordOauthUrl } from "~/lib/api/user.server";
+import { getDiscordOauthUrl, getUserGuilds } from "~/lib/api/user.server";
 import {
   commitCSRFTokenSession,
   getCSRFTokenSession,
@@ -52,14 +52,24 @@ export async function loader({ request }: LoaderArgs) {
   }
 
   const userId = currentUser.userId;
+  const userGuilds = await getUserGuilds(userId);
 
-  return json({ userId, userLoggedIn: true } as const, {
+  if (!userGuilds.ok) {
+    throw new Response(null, {
+      status: 500,
+      statusText: "Internal Server Error",
+    });
+  }
+
+  return json({ userId, userLoggedIn: true, userGuilds } as const, {
     headers: { "Set-Cookie": await commitCSRFTokenSession(csrfSession) },
   });
 }
 
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
+
+  console.log({ loaderData });
 
   return (
     <main className="container py-32 flex justify-center">

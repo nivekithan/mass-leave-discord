@@ -1,4 +1,4 @@
-import { InferModel } from "drizzle-orm";
+import { InferModel, eq } from "drizzle-orm";
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { db } from "src/utils/db";
 
@@ -25,4 +25,8 @@ export function upsertUserToDb(user: NewUserInDb) {
     })
     .returning()
     .get();
+}
+
+export function getUserFromDb(userId: string): UserInDb | undefined {
+  return db.select().from(userTable).where(eq(userTable.id, userId)).get();
 }
