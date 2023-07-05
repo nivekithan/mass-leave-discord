@@ -4,7 +4,7 @@ import {
   type LoaderArgs,
   type V2_MetaFunction,
 } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { getDiscordOauthUrl } from "~/lib/api/user.server";
 import {
@@ -72,9 +72,11 @@ export default function Index() {
           tool to easily leave from them immediately
         </p>
         {loaderData.userLoggedIn ? (
-          <Button variant="default" className="mt-8">
-            Hey you are logged In. So logout
-          </Button>
+          <Form method="POST" action="./logout">
+            <Button variant="default" className="mt-8" type="submit">
+              Hey you are logged In. So logout
+            </Button>
+          </Form>
         ) : (
           <Button variant="default" asChild className="mt-8">
             <Link to={loaderData.discordOAuthUrl}>Connect Discord</Link>

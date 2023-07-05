@@ -29,7 +29,7 @@ export async function loginInUser(request: Request, userId: string) {
   return setCookieHeaderValue;
 }
 
-export async function logOutUser(request: Request) {
+export async function logoutUser(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
   const userSession = await userIdSession.getSession(cookieHeader);
 
