@@ -71,10 +71,6 @@ export async function loader({ request }: LoaderArgs) {
   responseHeaders.append("Set-Cookie", csrfTokenSetCookieValue);
   responseHeaders.append("Set-Cookie", userIdSetCookieValue);
 
-  /**
-   * TODO:
-   * Set userId in session storage and pass it in cookie
-   */
   return redirect("/", {
     headers: responseHeaders,
   });

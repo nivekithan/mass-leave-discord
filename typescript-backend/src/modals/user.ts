@@ -15,6 +15,14 @@ export const userTable = sqliteTable("user", {
 export type UserInDb = InferModel<typeof userTable, "select">;
 export type NewUserInDb = InferModel<typeof userTable, "insert">;
 
-export function insertUserToDb(user: NewUserInDb) {
-  return db.insert(userTable).values(user).returning().get();
+export function upsertUserToDb(user: NewUserInDb) {
+  return db
+    .insert(userTable)
+    .values(user)
+    .onConflictDoUpdate({
+      set: { ...user, id: undefined },
+      target: userTable.id,
+    })
+    .returning()
+    .get();
 }

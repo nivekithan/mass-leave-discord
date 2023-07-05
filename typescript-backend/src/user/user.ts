@@ -4,7 +4,7 @@ import { BAD_REQUEST } from "src/utils/statusCode";
 import { z } from "zod";
 import { getEnvVar } from "src/utils/env";
 import { getDiscordUser } from "src/discord/user";
-import { insertUserToDb } from "src/modals/user";
+import { upsertUserToDb } from "src/modals/user";
 import { fromZodError } from "zod-validation-error";
 import { exchangeOAuthCode } from "src/discord/oauth2";
 
@@ -59,11 +59,7 @@ userRouter.post("/discord/authorize", async (c) => {
     token: authorizationFromDiscord.access_token,
   });
 
-  // TODO:
-  // If a user with existing connects discord account again
-  // then we have to update authorization_keys
-
-  const userId = insertUserToDb({
+  const userId = upsertUserToDb({
     id: discordUser.id,
     access_key: authorizationFromDiscord.access_token,
     discriminator: discordUser.discriminator,
