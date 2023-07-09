@@ -1,8 +1,10 @@
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { matchSorter } from "match-sorter";
 
 function guildListReducer(
   state: Record<string, boolean>,
@@ -59,35 +61,56 @@ export function GuildList({
     return Object.values(guildItemCheckboxState).filter((v) => v).length;
   }, [guildItemCheckboxState]);
 
+  const [searchValue, setSearchValue] = useState("");
+
+  const searchedGuildItems = useMemo(() => {
+    return matchSorter(guilds, searchValue, {
+      keys: ["name"],
+    });
+  }, [guilds, searchValue]);
+
   return (
-    <div className="flex flex-col gap-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-x-4">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              dispatchGuildItemCheckboxState({ type: "select_all" });
-            }}
-          >
-            Select All
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              dispatchGuildItemCheckboxState({ type: "unselect_all" });
-            }}
-          >
-            Unselect All
+    <div className="flex flex-col gap-y-6">
+      <div className="flex flex-col gap-y-3">
+        <div className="flex justify-between items-center">
+          <div className="flex gap-x-4">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                dispatchGuildItemCheckboxState({ type: "select_all" });
+              }}
+              size="sm"
+            >
+              Select All
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                dispatchGuildItemCheckboxState({ type: "unselect_all" });
+              }}
+              size="sm"
+            >
+              Unselect All
+            </Button>
+          </div>
+          <Button variant="destructive" disabled={selectedItems <= 0}>
+            Leave from {selectedItems} servers
           </Button>
         </div>
-        <Button variant="destructive" disabled={selectedItems <= 0}>
-          <p>Leave from {selectedItems} servers</p>
-        </Button>
+        <Input
+          type="text"
+          placeholder="Type name of server"
+          value={searchValue}
+          onChange={(e) => {
+            const value = e.currentTarget.value;
+            setSearchValue(value);
+          }}
+        />
       </div>
       <ol className="flex flex-col gap-y-8">
-        {guilds.map(({ iconUrl, id, name }) => {
+        {searchedGuildItems.map(({ iconUrl, id, name }) => {
           return (
             <li
               key={id}
