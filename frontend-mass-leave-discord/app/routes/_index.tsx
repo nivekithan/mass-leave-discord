@@ -4,7 +4,8 @@ import {
   type LoaderArgs,
   type V2_MetaFunction,
 } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
+import { GuildList } from "~/components/guildList";
 import { Button } from "~/components/ui/button";
 import { getDiscordOauthUrl, getUserGuilds } from "~/lib/api/user.server";
 import {
@@ -61,32 +62,39 @@ export async function loader({ request }: LoaderArgs) {
     });
   }
 
-  return json({ userId, userLoggedIn: true, userGuilds } as const, {
-    headers: { "Set-Cookie": await commitCSRFTokenSession(csrfSession) },
-  });
+  return json(
+    { userId, userLoggedIn: true, userGuilds: userGuilds.guilds } as const,
+    {
+      headers: { "Set-Cookie": await commitCSRFTokenSession(csrfSession) },
+    }
+  );
 }
 
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
 
-  console.log({ loaderData });
-
   return (
-    <main className="container py-32 flex justify-center">
-      <div className="flex flex-col items-center">
+    <main className="container py-32">
+      <div className="flex flex-col items-center gap-y-8">
         <h1 className="text-4xl font-semibold leading-none tracking-tight text-center">
           Mass leave Discord Servers
         </h1>
-        <p className="mt-8 max-w-xl text-center text-lg leading-none ">
+        <p className="max-w-xl text-center text-lg leading-none ">
           Is your discord dashboard full of servers you don't care ? Use this
           tool to easily leave from them immediately
         </p>
         {loaderData.userLoggedIn ? (
-          <Form method="POST" action="./logout">
-            <Button variant="default" className="mt-8" type="submit">
-              Hey you are logged In. So logout
-            </Button>
-          </Form>
+          <div>
+            <GuildList
+              guilds={loaderData.userGuilds.map((v) => {
+                return {
+                  iconUrl: v.icon_url || "",
+                  id: v.id,
+                  name: v.name,
+                };
+              })}
+            />
+          </div>
         ) : (
           <Button variant="default" asChild className="mt-8">
             <Link to={loaderData.discordOAuthUrl}>Connect Discord</Link>
