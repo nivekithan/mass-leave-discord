@@ -1,10 +1,21 @@
-import { useMemo, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { matchSorter } from "match-sorter";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { Form, useNavigation } from "@remix-run/react";
 
 function guildListReducer(
   state: Record<string, boolean>,
@@ -69,6 +80,26 @@ export function GuildList({
     });
   }, [guilds, searchValue]);
 
+  const selectedGuilds = useMemo(() => {
+    return Object.keys(guildItemCheckboxState).filter(
+      (key) => guildItemCheckboxState[key]
+    );
+  }, [guildItemCheckboxState]);
+
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+
+  const navigation = useNavigation();
+
+  const isSubmitting = navigation.state === "submitting";
+
+  useEffect(() => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsAlertDialogOpen(false);
+  }, [isSubmitting]);
+
   return (
     <div className="flex flex-col gap-y-6">
       <div className="flex flex-col gap-y-3">
@@ -95,9 +126,50 @@ export function GuildList({
               Unselect All
             </Button>
           </div>
-          <Button variant="destructive" disabled={selectedItems <= 0}>
-            Leave from {selectedItems} servers
-          </Button>
+          <AlertDialog
+            open={isAlertDialogOpen}
+            onOpenChange={(newOpen) => {
+              if (isSubmitting) {
+                return;
+              }
+
+              setIsAlertDialogOpen(newOpen);
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={selectedItems <= 0}>
+                Leave from {selectedItems} servers
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure ?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Do you want to be removed from {selectedItems} servers
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Form method="POST">
+                  <input
+                    type="text"
+                    hidden
+                    name="idList"
+                    value={JSON.stringify(selectedGuilds)}
+                    readOnly
+                  />
+                  <Button
+                    variant="destructive"
+                    type="submit"
+                    name="action"
+                    value="remove_servers"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                  </Button>
+                </Form>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
         <Input
           type="text"

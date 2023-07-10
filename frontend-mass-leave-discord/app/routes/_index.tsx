@@ -3,8 +3,10 @@ import {
   Response,
   type LoaderArgs,
   type V2_MetaFunction,
+  type ActionArgs,
 } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import { z } from "zod";
 import { GuildList } from "~/components/guildList";
 import { Button } from "~/components/ui/button";
 import { getDiscordOauthUrl, getUserGuilds } from "~/lib/api/user.server";
@@ -13,6 +15,7 @@ import {
   getCSRFTokenSession,
 } from "~/lib/cookies/csrfTokenCookie.server";
 import { getCurrentUser } from "~/lib/cookies/userIdCookie.server";
+import { fromZodError } from "zod-validation-error";
 
 export const meta: V2_MetaFunction = () => {
   return [
@@ -68,6 +71,60 @@ export async function loader({ request }: LoaderArgs) {
       headers: { "Set-Cookie": await commitCSRFTokenSession(csrfSession) },
     }
   );
+}
+
+function safeJSONParse(jsonString: string) {
+  try {
+    const value = JSON.parse(jsonString) as unknown;
+
+    return { ok: true, value } as const;
+  } catch (err: unknown) {
+    return { ok: false, err } as const;
+  }
+}
+
+export async function action({ request }: ActionArgs) {
+  const formData = await request.formData();
+
+  const action = formData.get("action");
+
+  if (!action || action !== "remove_servers") {
+    return json({ status: "error", error: "unknown_action" } as const, {
+      status: 400,
+    });
+  }
+
+  const ids = formData.get("idList");
+
+  if (!ids || typeof ids !== "string") {
+    return json({ status: "error", error: "invalid_idList" } as const, {
+      status: 400,
+    });
+  }
+
+  const idList = safeJSONParse(ids);
+
+  if (!idList.ok) {
+    return json({ status: "error", error: "invalid_idList" } as const, {
+      status: 400,
+    });
+  }
+
+  const jsonValue = z.array(z.string()).safeParse(idList.value);
+
+  if (!jsonValue.success) {
+    return json(
+      {
+        status: "error",
+        error: fromZodError(jsonValue.error).message,
+      } as const,
+      { status: 400 }
+    );
+  }
+
+  const guildIdsToLeave = jsonValue.data;
+
+  return json({ guildIdsToLeave, status: "ok" } as const);
 }
 
 export default function Index() {
