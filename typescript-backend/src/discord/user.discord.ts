@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DISCORD_API_BASE_URL } from "./constant";
+import { DISCORD_API_BASE_URL } from "./constant.discord";
 
 const DiscordUserSchema = z.object({
   id: z.string(),

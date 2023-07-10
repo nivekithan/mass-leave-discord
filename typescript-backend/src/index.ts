@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { getEnvVar } from "./utils/env";
-import { userRouter } from "./user/user";
+import { userRouter } from "./userRouter/user.router";
 
 const api = new Hono();
 

@@ -3,11 +3,11 @@ import { generateDiscordOAuthUrl } from "./oauth";
 import { BAD_REQUEST } from "src/utils/statusCode";
 import { z } from "zod";
 import { getEnvVar } from "src/utils/env";
-import { getCurrentUserGuilds, getDiscordUser } from "src/discord/user";
-import { getUserFromDb, upsertUserToDb } from "src/modals/user";
+import { getCurrentUserGuilds, getDiscordUser } from "src/discord/user.discord";
+import { getUserFromDb, upsertUserToDb } from "src/modals/user.modal";
 import { fromZodError } from "zod-validation-error";
-import { exchangeOAuthCode } from "src/discord/oauth2";
-import { getDiscordLink } from "src/discord/imageLink";
+import { exchangeOAuthCode } from "src/discord/oauth2.discord";
+import { getDiscordLink } from "src/discord/imageLink.discord";
 
 export const userRouter = new Hono();
 

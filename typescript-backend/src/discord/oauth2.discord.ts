@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DISCORD_TOKEN_URL } from "./constant";
+import { DISCORD_TOKEN_URL } from "./constant.discord";
 
 export async function exchangeOAuthCode({
   clientId,
