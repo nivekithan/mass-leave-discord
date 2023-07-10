@@ -9,12 +9,16 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { z } from "zod";
 import { GuildList } from "~/components/guildList";
 import { Button } from "~/components/ui/button";
-import { getDiscordOauthUrl, getUserGuilds } from "~/lib/api/user.server";
+import {
+  getDiscordOauthUrl,
+  getUserGuilds,
+  removeUserFromGuilds,
+} from "~/lib/api/user.server";
 import {
   commitCSRFTokenSession,
   getCSRFTokenSession,
 } from "~/lib/cookies/csrfTokenCookie.server";
-import { getCurrentUser } from "~/lib/cookies/userIdCookie.server";
+import { getCurrentUser, requireUser } from "~/lib/cookies/userIdCookie.server";
 import { fromZodError } from "zod-validation-error";
 
 export const meta: V2_MetaFunction = () => {
@@ -84,6 +88,9 @@ function safeJSONParse(jsonString: string) {
 }
 
 export async function action({ request }: ActionArgs) {
+  const user = await requireUser(request);
+  const userId = user.userId;
+
   const formData = await request.formData();
 
   const action = formData.get("action");
@@ -123,6 +130,8 @@ export async function action({ request }: ActionArgs) {
   }
 
   const guildIdsToLeave = jsonValue.data;
+
+  await removeUserFromGuilds(userId, guildIdsToLeave);
 
   return json({ guildIdsToLeave, status: "ok" } as const);
 }

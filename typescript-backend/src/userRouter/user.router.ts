@@ -8,6 +8,7 @@ import { getUserFromDb, upsertUserToDb } from "src/modals/user.modal";
 import { fromZodError } from "zod-validation-error";
 import { exchangeOAuthCode } from "src/discord/oauth2.discord";
 import { getDiscordLink } from "src/discord/imageLink.discord";
+import { leaveGuild } from "src/discord/guilds.discord";
 
 export const userRouter = new Hono();
 
@@ -111,4 +112,41 @@ userRouter.get("/:userId/active_guilds", async (c) => {
       };
     }),
   });
+});
+
+userRouter.delete("/:userId/leave_guilds", async (c) => {
+  const userId = c.req.param("userId");
+
+  const json: unknown = await c.req.json();
+
+  const validateIdList = z.array(z.string()).safeParse(json);
+
+  if (!validateIdList.success) {
+    return c.json(
+      {
+        ok: false,
+        error: "bad_request",
+        message: fromZodError(validateIdList.error).message,
+      },
+      BAD_REQUEST
+    );
+  }
+
+  const idList = validateIdList.data;
+
+  const userFromDb = getUserFromDb(userId);
+
+  if (!userFromDb) {
+    return c.json({
+      ok: false,
+      error: "bad_request",
+      message: `There is no user with id: ${userId}`,
+    });
+  }
+
+  await Promise.all(
+    idList.map((id) => leaveGuild({ id, token: userFromDb.access_key }))
+  );
+
+  return c.json({ ok: true });
 });

@@ -25,6 +25,9 @@ dependencies:
     version: 1.3.1(zod@3.21.4)
 
 devDependencies:
+  '@total-typescript/ts-reset':
+    specifier: ^0.4.2
+    version: 0.4.2
   '@types/better-sqlite3':
     specifier: ^7.6.4
     version: 7.6.4
@@ -471,6 +474,10 @@ packages:
     resolution: {integrity: sha512-sNnTdguCJKclHdzyn054q/2/XO7EswUW3TPRQT3NSBpZwWl7EOLYAgnCImjIJHPawV71Y/R1fFyuCjJFWrnI9A==}
     engines: {node: '>=18.0.0'}
     dev: false
+
+  /@total-typescript/ts-reset@0.4.2:
+    resolution: {integrity: sha512-vqd7ZUDSrXFVT1n8b2kc3LnklncDQFPvR58yUS1kEP23/nHPAO9l1lMjUfnPrXYYk4Hj54rrLKMW5ipwk7k09A==}
+    dev: true
 
   /@types/better-sqlite3@7.6.4:
     resolution: {integrity: sha512-dzrRZCYPXIXfSR1/surNbJ/grU3scTaygS0OMzjlGf71i9sc2fGyHPXXiXmEvNIoE0cGwsanEFMVJxPXmco9Eg==}

@@ -70,3 +70,20 @@ export async function getUserGuilds(userId: string) {
 
   return body;
 }
+
+export async function removeUserFromGuilds(
+  userId: string,
+  guildIdList: Array<string>
+) {
+  const url = new URL(
+    `/api/v1/user/${userId}/leave_guilds`,
+    getEnvVar("BACKEND_URL")
+  );
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    body: JSON.stringify(guildIdList),
+  }).then((res) => res.json());
+
+  console.log(res);
+}
